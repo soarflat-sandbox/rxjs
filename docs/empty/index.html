@@ -11,6 +11,7 @@
     <button id="pause">Pause Timer</button>
     <button id="resume">Resume Timer</button>
     <button id="force">5!</button>
+    <button id="force2">10!</button>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
   <script> 
@@ -47,16 +48,18 @@
     /**
      * example3
      */
-    const getInterval = v => 
-      Rx.Observable
-        .interval(1000)
-        .mapTo(v);
-    const force$ = Rx.Observable
-      .fromEvent(force, 'click')
-      .mapTo(5)
-      .startWith(0)
-      .switchMap(getInterval);
-    force$
+    const force$ = Rx.Observable.fromEvent(force, 'click').mapTo(5);
+    const force2$ = Rx.Observable.fromEvent(force2, 'click').mapTo(10);
+    const getInterval = v => Rx.Observable.interval(1000).mapTo(v);
+    const getInterval2 = () => Rx.Observable.interval(1000).mapTo(3);
+    Rx.Observable
+      .merge(
+        Rx.Observable.merge(force$, force2$).startWith(0).switchMap(getInterval),
+        Rx.Observable.merge(pause$, resume$).startWith(true).switchMap(running => running 
+          ? getInterval2() 
+          : Rx.Observable.empty()
+        )
+      )
       .scan((acc, cur) => (cur ? cur + acc : acc), 0)
       .subscribe((v) => {
         console.log('v', v);
