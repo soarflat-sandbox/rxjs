@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>mapTo</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    // mapToは出力値を一定値にマッピングする
+    const source = Rx.Observable.interval(1000)
+      .mapTo('HEllO WORLD!!');
+    // HEllO WORLD!!を指定しているため、必ずHEllO WORLD!!を出力する
+    // 本来なら0,1,2,3...
+    const subscribe = source.subscribe(val => console.log(val));
+
+    const source2 = Rx.Observable.interval(1000);
+    const subscribe2 = source2.subscribe(val => console.log(val));
+
+    const end = 1000;
+    const currentNumber = 0;
+    const source3 = Rx.Observable.interval(1000)
+      // .mapTo(end > currentNumber ? 1 : -1);
+      // ↑と同じ
+      .mapTo(mapToHandler(end, currentNumber));
+
+    const subscribe3 = source3.subscribe(val => console.log(val));
+
+    function mapToHandler(end, currentNumber) {
+      return end > currentNumber ? 1 : -1;
+    }
+  </script>
+</body>
+</html>

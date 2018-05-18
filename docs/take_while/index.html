@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>takeWhile</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    const source = Rx.Observable.of(1, 2, 3, 4, 5)
+    // 指定された値がfalseになるまで値を出力し続ける
+    // 今回はvalが4以下の場合はtrueになるため
+    // 1,2,3,4が出力される
+      .takeWhile(val => val <= 4);
+    const subscribe = source.subscribe(val => console.log(val));
+
+    // takeWhileの場合falseになるまで出力し続けるため
+    // 出力は3回、全ての3が出力されるわけではない
+    const source2 = Rx.Observable.of(3, 3, 3, 9, 1, 4, 5, 8, 96, 3, 66, 3, 3, 3)
+      .takeWhile(val => val === 3);
+    const subscribe2 = source2.subscribe(val => console.log('takeWhile', val));
+    // => takeWhile 3
+    // => takeWhile 3
+    // => takeWhile 3
+
+    // filterの場合trueになるものを出力するため
+    // 出力は7回、全ての3が出力される
+    const source3 = Rx.Observable.of(3, 3, 3, 9, 1, 4, 5, 8, 96, 3, 66, 3, 3, 3)
+      .filter(val => val === 3);
+    const subscribe3 = source3.subscribe(val => console.log('filter', val));
+    // => filter 3
+    // => filter 3
+    // => filter 3
+    // => filter 3
+    // => filter 3
+    // => filter 3
+    // => filter 3
+
+    let currentNumber = 0;
+    const source4 = Rx.Observable.timer(0, 1000)
+      .mapTo(1)
+      .startWith(0)
+      .scan((acc, curr) => {
+        console.log('currentNumber', currentNumber);
+        console.log('acc', acc);
+        console.log('curr', curr);
+        return acc + curr;
+      })
+      .takeWhile(val => val < 100)
+      .do(v => {
+        currentNumber = v;
+      })
+      .startWith(0);
+    const subscribe4 = source4.subscribe(val => console.log('timer', val));
+  </script>
+</body>
+</html>

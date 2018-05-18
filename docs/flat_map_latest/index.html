@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>flatMapLatest</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.all.min.js"></script>
+  <script>
+    function getRange(x) {
+      console.log('getRange', x);
+      return Rx.Observable.range(x, 20);
+    }
+
+    // flatMapLatest演算子は、標準のFlatMap演算子と非常によく似た動作をします。
+    // ただし、新しいアイテムがObservableソースによって送出されるたびに、
+    // 以前に発行されたアイテムから生成されたObservableのミラーリングを解除して停止し、
+    // 現在のミラーリングのみを開始します。
+    const source = Rx.Observable
+      .range(1, 11)
+      .flatMapLatest(getRange);
+
+    const subscribe = source.subscribe(val => console.log(val));
+  </script>
+</body>
+</html>

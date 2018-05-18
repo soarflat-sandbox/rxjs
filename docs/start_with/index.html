@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>startWith</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    const source = Rx.Observable.of('World!', 'Goodbye', 'World!')
+      // 与えられた値を最初に出力する
+      // そのため今回はHelloが初めに出力される
+      .startWith('Hello')
+      .scan((acc, curr) => `${acc} ${curr}`);
+
+    const subscribe =　source.subscribe(val => console.log(val));
+    // => Hello
+    // => Hello World!
+    // => Hello World! Goodbye
+    // => Hello World! Goodbye World!
+
+    const source2 = Rx.Observable.interval(1000)
+      .startWith(-3, -2, -1);
+    const subscribe2 =　source2.subscribe(val => console.log(val));
+    // => -3
+    // => -2
+    // => -1
+    // => 0
+    // => 1
+    // => 2
+    // => 3
+    // => 4
+  </script>
+</body>
+</html>

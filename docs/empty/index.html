@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Empty</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <div id="app">
+    <h4>Time remaining: <span id="remaining"></span></h4>
+    <button id="pause">Pause Timer</button>
+    <button id="resume">Resume Timer</button>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script> 
+    Rx.Observable
+      .empty()
+      .subscribe({
+        next: () => console.log('Next'),
+        complete: () => console.log('Complete!')
+      });
+
+    const countdownSeconds = 10;
+    const setHTML = id => val => (document.getElementById(id).innerHTML = val);
+    const pauseButton = document.getElementById('pause');
+    const resumeButton = document.getElementById('resume');
+    const interval$ = Rx.Observable.interval(1000).mapTo(-1);
+
+    const pause$ = Rx.Observable.fromEvent(pauseButton, 'click').mapTo(false);
+    const resume$ = Rx.Observable.fromEvent(resumeButton, 'click').mapTo(true);
+
+    const timer$ = Rx.Observable
+      .merge(pause$, resume$)
+      .startWith(true)
+      // 1秒ごとに-1を返すObservableか、空のObservableを返す
+      // 空のObservableが返されると以降のoperatorは実行されずsubscribeもされない
+      .switchMap(running => running ? interval$ : Rx.Observable.empty())
+      .scan((currentCount, count) => (count ? count + currentCount : currentCount), countdownSeconds)
+      .takeWhile(currentCount => currentCount >= 0)
+      .subscribe(setHTML('remaining'));
+  </script>
+</body>
+</html>

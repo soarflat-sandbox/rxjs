@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>fromEvent</title>
+</head>
+<body>
+  <button id="click-me">ボタン</button>
+  <div id="result"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    const buttonEl = document.querySelector('#click-me');
+    const resultEl = document.querySelector('#result');
+
+    // Rx.Observable.fromEvent()を利用して、
+    // ボタンのクリックイベントをストリームとして扱う
+    const buttonClick$ = Rx.Observable.fromEvent(buttonEl, 'click');
+
+    buttonClick$
+    // subscribe()にはfilterでtrueになるものしか流さない
+      .filter(ev => !ev.altKey && !ev.shiftKey)
+      //
+      .subscribe(ev => {
+        const spanEl = document.createElement('span');
+        spanEl.innerText = 'clicked';
+        resultEl.appendChild(spanEl);
+      });
+
+    buttonClick$
+      .filter(ev => ev.altKey)
+      .subscribe(ev => {
+        const spanEl = document.createElement('span');
+        spanEl.innerText = 'altKey!';
+        resultEl.appendChild(spanEl);
+      });
+
+    buttonClick$
+      .filter(ev => ev.shiftKey)
+      .subscribe(ev => {
+        const spanEl = document.createElement('span');
+        spanEl.innerText = 'shiftKey!';
+        resultEl.appendChild(spanEl);
+      });
+
+    // fromEventはイベントをobservable sequencesにする
+    // クリックイベントを発生させるobservableを作成する
+    const source = Rx.Observable.fromEvent(document, 'click');
+
+    // 指定されたイベントタイムスタンプで文字列にマップする
+    const example = source.map(event => `Event time ${event.timeStamp}`);
+
+    // exampleを出力
+    const subscribe = example.subscribe(val => console.log(val));
+
+    // ↑は以下のようにも書ける
+    const document$ = Rx.Observable.fromEvent(document, 'click')
+      .map(event => `Event time ${event.timeStamp}`)
+      .subscribe(val => console.log(val));
+
+
+  </script>
+</body>
+</html>

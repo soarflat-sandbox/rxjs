@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>combineLatest</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    // combineLatestは何れかのストリームが値を出力すると
+    // それぞれから最新の値を出力する
+    //
+    // Why use
+    // この演算子は、いくつかの計算や決定のためにお互いに依存する複数の長命観測値を持つ場合に最も適しています。
+    // これの基本的な例は、複数のボタンからのイベントを組み合わせてそれぞれのカウントと全体の合計、
+    // またはRxJSのドキュメントからのBMIの計算を生成する例3にあります。
+    //
+    // combineLatestは、各観測値が少なくとも1つの値を出力するまで、初期値を出力しないことに注意してください。
+    // これはwithLatestFromと同じ動作で、出力もエラーもなくなりますが、内側の観測値のうちの1つ（またはそれ以上）が意図したとおりに機能しないか、サブスクリプションが遅くなる可能性があります。
+    // 最後に、1つの値しか出力しないストリームを使用している場合、または完了前にそれぞれの最後の値を必要とする場合は、forkJoinを使用する方が良い可能性があります。
+
+    /**
+     * example1
+     */
+    const timerOne = Rx.Observable.timer(1000, 4000);
+    const timerTwo = Rx.Observable.timer(2000, 4000);
+    const timerThree = Rx.Observable.timer(3000, 4000);
+    const combined = Rx.Observable.combineLatest(timerOne, timerTwo, timerThree);
+    const subscribe = combined.subscribe(
+      ([timerOne, timerTwo, timerThree]) => {
+        console.log(`
+        Timer One Latest: ${timerOne},
+        Timer Two Latest: ${timerTwo},
+        Timer Three Latest: ${timerThree}
+        `);
+      }
+    );
+
+    /**
+     * example2
+     */
+    const timerOne2 = Rx.Observable.timer(1000, 2000);
+    const timerTwo2 = Rx.Observable.timer(2000, 2000);
+    const timerThree2 = Rx.Observable.timer(3000, 2000);
+    const combined2 = Rx.Observable.combineLatest(
+      timerOne2,
+      timerTwo2,
+      timerThree2,
+      (one, two, three) => {
+        return `
+        Timer One (Proj) Latest: ${one},
+        Timer Two (Proj) Latest: ${two},
+        Timer Three (Proj) Latest: ${three}`;
+      }
+    );
+    const subscribe2 = combined2.subscribe(latestValuesProject => {
+      console.log(latestValuesProject);
+    });
+
+  </script>
+</body>
+</html>

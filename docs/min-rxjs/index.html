@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>実装して学ぶRxJS</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <script>
+    class Observable {
+      /**
+       * constructor
+       * @param producer observerを引数にとり、次にどのタイミングで、どの値を流すか決定する関数
+       */
+      constructor(producer) {
+        this.subscribe = producer;
+      }
+    }
+
+    Observable.prototype.of = function (...values) {
+      const producer = observer => {
+        values.forEach(v => observer.next(v));
+        observer.complete();
+      };
+      return new Observable(producer);
+    };
+
+    Observable.prototype.map = function (f) {
+      const producer = observer => {
+        return this.subscribe({
+          next(value) { observer.next(f(value)) },
+          complete() { observer.complete() }
+        });
+      };
+      return new Observable(producer);
+    };
+
+    const observer = {
+      next: (v) => console.log(v),
+      complete: () => console.log('complete'),
+    };
+
+    // Observableを返す
+    console.log(new Observable());
+
+    // subscribeが
+    // observer => {
+    //   values.forEach(v => observer.next(v));
+    //   observer.complete();
+    // };
+    // のObservableを返す
+    console.log(new Observable().of(1, 2, 3));
+
+    new Observable().of(1, 2, 3).subscribe(observer);
+    // => 1
+    // => 2
+    // => 3
+    // => complete
+
+    const observer2 = {
+      next: (v) => console.log(v),
+      complete: () => console.log('complete'),
+    };
+
+    console.log(new Observable().of(1, 2, 3));
+    console.log(new Observable().of(1, 2, 3).map(x => x * x));
+
+    new Observable().of(1, 2, 3).map(x => x * x).subscribe(observer2);
+    // => 1
+    // => 4
+    // => 9
+    // => complete
+  </script>
+</body>
+</html>

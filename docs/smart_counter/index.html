@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Smart Counter</title>
+</head>
+<body>
+  <input id="range" type="number">
+  <button id="update">Update</button>
+  <h3 id="display">0</h3>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    const takeUntilFunc = (endRange, currentNumber) => {
+      return endRange > currentNumber
+        ? val => val <= endRange
+        : val => val >= endRange;
+    };
+
+    const positiveOrNegative = (endRange, currentNumber) => {
+      return endRange > currentNumber ? 1 : -1;
+    };
+
+    const updateHTML = id => val => (document.getElementById(id).innerHTML = val);
+    // display
+    const input = document.getElementById('range');
+    const updateButton = document.getElementById('update');
+
+    const subscription = (function (currentNumber) {
+      return Rx.Observable
+      // クリックイベントのオブザーバルを生成
+        .fromEvent(updateButton, 'click')
+        // inputの中身を数値にしてマップする
+        .map(_ => parseInt(input.value))
+        // endRangeにはマップした数値が入る
+        // 例えば、inputに'2632'を入力してupdateButtonをクリックした場合
+        // endRangeには2632が格納されている
+        //
+        // switchMapに新しいストリームが流れてくる（今回の場合、再度updateButtonをクリックする場合）と
+        // それまで実行中だった処理が中断され、新しく流れてきた値と共にまた最初から処理を開始する
+        // つまり、2632を入力してクリックした場合、0から2632までカウントアップが始まるが、
+        // カウントアップ途中で222などと入力してクリックすると、0から2632までカウントアップ処理は
+        // 中断され、現在の数値から222までのカウントが始まる
+        .switchMap(endRange => {
+          return Rx.Observable.timer(0, 20)
+          // 出力値を一定値にマッピングする
+          // .scan((acc, curr)のcurrに1か-1が入る
+            .mapTo(positiveOrNegative(endRange, currentNumber))
+            // .scan((acc, curr)のaccにcurrentNumberが入る
+            .startWith(currentNumber)
+            .scan((acc, curr) => acc + curr)
+            // falseになるまでRx.Observable.timer(0, 20)は続く
+            .takeWhile(takeUntilFunc(endRange, currentNumber))
+        })
+        .do(v => currentNumber = v)
+        .startWith(currentNumber)
+        .subscribe(updateHTML('display'));
+    }(0))
+
+  </script>
+</body>
+</html>

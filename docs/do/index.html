@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>do</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    const source = Rx.Observable.of(1, 2, 3, 4, 5)
+      // ロギングなどのアクションや副作用を透過的に実行する
+      // ようはストリームの値に影響を与えない
+      .do(val => console.log(`BEFORE MAP: ${val}`))
+      .map(val => val + 10)
+      .do(val => console.log(`AFTER MAP: ${val}`))
+    const subscribe = source.subscribe(val => console.log(val));
+    // BEFORE MAP: 1
+    // AFTER MAP: 11
+    // 11
+    // BEFORE MAP: 2
+    // AFTER MAP: 12
+    // 12
+    // BEFORE MAP: 3
+    // AFTER MAP: 13
+    // 13
+    // BEFORE MAP: 4
+    // AFTER MAP: 14
+    // 14
+    // BEFORE MAP: 5
+    // AFTER MAP: 15
+    // 15
+  </script>
+</body>
+</html>

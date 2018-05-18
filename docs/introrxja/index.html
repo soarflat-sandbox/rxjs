@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>introrxja</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <div class="refresh" style="background: #ccc; cursor: pointer;">refresh</div>
+  <div class="close1" style="background: red; cursor: pointer;">close1</div>
+  <div class="close2" style="background: red; cursor: pointer;">close2</div>
+  <div class="close3" style="background: red; cursor: pointer;">close3</div>
+  <div id="suggestion1"></div>
+  <script
+    src="https://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+    crossorigin="anonymous"></script>
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.all.min.js"></script>
+  <script>
+    const refreshButton = document.querySelector('.refresh');
+    const refreshClickStream = Rx.Observable.fromEvent(refreshButton, 'click');
+
+    const closeButton1 = document.querySelector('.close1');
+    const close1ClickStream = Rx.Observable.fromEvent(closeButton1, 'click');
+
+    const responseStream = refreshClickStream
+      .startWith('startup click')
+      .map(() => {
+        const randomOffset = Math.floor(Math.random() * 500);
+        return 'https://api.github.com/users?since=' + randomOffset;
+      })
+      .flatMap(requestUrl => {
+        return Rx.Observable.fromPromise($.ajax({ url: requestUrl }));
+      });
+
+    const suggestion1Stream = close1ClickStream
+      .startWith('startup click')
+      .combineLatest(
+        responseStream,
+        (click, listUsers) => {
+          console.log('listUsers', listUsers);
+          return listUsers[Math.floor(Math.random() * listUsers.length)]
+        }
+      )
+      .merge(
+        refreshClickStream.map(() => null)
+      )
+      .startWith(null);
+
+    suggestion1Stream.subscribe(suggestion => {
+      const suggestion1 = document.getElementById('suggestion1');
+      console.log(suggestion);
+
+      if (suggestion === null) {
+        // hide the first suggestion DOM element
+        suggestion1.style.display = 'none';
+      }
+      else {
+        suggestion1.style.display = 'block';
+        suggestion1.innerText = suggestion.id;
+        // show the first suggestion DOM element
+        // and render the data
+      }
+    });
+
+    // const requestStream = Rx.Observable.return('https://api.github.com/users');
+    //
+    // const responseMetastream = requestStream.map(requestUrl =>
+    //   // Rx.Observable.fromPromise()はPromiseをストリーム(Observable)に変換する
+    //   Rx.Observable.fromPromise($.getJSON(requestUrl))
+    // );
+    //
+    // const responseStream = requestStream.flatMap(requestUrl =>
+    //   Rx.Observable.fromPromise($.getJSON(requestUrl))
+    // );
+    //
+    // responseMetastream.subscribe(response => {
+    //   console.log(response);
+    // });
+    //
+    // responseStream.subscribe(response => {
+    //   console.log(response);
+    // });
+    //
+    // const refreshButton = document.querySelector('.refresh');
+    // const refreshClickStream = Rx.Observable.fromEvent(refreshButton, 'click');
+    //
+    // const close1Button = document.querySelector('.close1');
+    // const close1ClickStream = Rx.Observable.fromEvent(close1Button, 'click');
+    //
+    // const requestStream2 = refreshClickStream
+    //   .startWith('startup click')
+    //
+    //   .map(() => {
+    //     const randomOffset = Math.floor(Math.random() * 500);
+    //     return 'https://api.github.com/users?since=' + randomOffset;
+    //   });
+
+    // // const startupRequestStream = Rx.Observable.return('https://api.github.com/users');
+    // //
+    // // requestStream2 = Rx.Observable.merge(
+    // //   requestOnRefreshStream, startupRequestStream
+    // // );
+    //
+    // const responseStream2 = requestStream2.flatMap(requestUrl =>
+    //   Rx.Observable.fromPromise($.getJSON(requestUrl))
+    // );
+    //
+    // const suggestion1Stream = responseStream2
+    //   .map(listUsers => {
+    //     return listUsers[Math.floor(Math.random() * listUsers.length)];
+    //   })
+    //   .merge(
+    //     refreshClickStream.map(() => null)
+    //   )
+    //   .startWith(null);
+    //
+    // suggestion1Stream.subscribe(response => {
+    //   console.log(response);
+    //   if (response === null) {
+    //     // hide the first suggestion DOM element
+    //   }
+    //   else {
+    //     // show the first suggestion DOM element
+    //     // and render the data
+    //   }
+    // });
+  </script>
+</body>
+</html>

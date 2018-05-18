@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>TakeUntil</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <button id="start">start</button>
+  <button id="stop">stop</button>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    const source = Rx.Observable
+      .timer(0, 1000)
+      // Rx.Observable.timer(3500)がemitされるまで
+      // timer(0, 1000)をemitする
+      .takeUntil(Rx.Observable.timer(3500));
+
+    source.subscribe(
+      x => console.log('Next: ' + x),
+      err => console.log('Error: ' + err),
+      () => console.log('Completed')
+    );
+    // Rx.Observable.timer(3500)がemitされるまで
+    // timer(0, 1000)をemitする
+    // そのため、出力は以下の通り
+    // => Next: 0
+    // => Next: 1
+    // => Next: 2
+    // => Next: 3
+    // この時点でRx.Observable.timer(3500)がemitするので、
+    // Observerのcompleteが実行されて処理が完了になる。
+    // Completed
+
+    // startボタンをクリックする度に
+    // 1秒ごとにscanを実行するObservableをemitする
+    // stopボタンをクリックするとcomplete
+    const stop = Rx.Observable.fromEvent(document.getElementById('stop'), 'click');
+    const start = Rx.Observable
+      .fromEvent(document.getElementById('start'), 'click')
+      .switchMap(() => Rx.Observable
+        .interval(1000)
+        .scan((acc) => acc + 1, 0)
+      )
+      .takeUntil(stop);
+
+    start.subscribe(
+      x => console.log('Next: ' + x),
+      err => console.log('Error: ' + err),
+      () => console.log('Completed')
+    );
+
+  </script>
+</body>
+</html>

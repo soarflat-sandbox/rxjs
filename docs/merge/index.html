@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>merge</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <div id="button">button</div>
+  <div id="button2">button</div>
+  <div id="button3">button</div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    /**
+     * example1
+     */
+    const button = document.getElementById('button');
+    const button2 = document.getElementById('button2');
+    const button3 = document.getElementById('button3');
+    const source = Rx.Observable
+      .merge(
+        Rx.Observable.fromEvent(button, 'click'),
+        Rx.Observable.fromEvent(button3, 'click')
+      )
+      .merge(Rx.Observable.fromEvent(button3, 'click'))
+      .merge(Rx.Observable.fromEvent(button2, 'click').map(() => null))
+      .map(e => (e && e.screenX) ? e.screenX * 2 : null);
+
+    source.subscribe((e) => {
+      console.log(e);
+      if (e && e.target) {
+        console.log(e.target);
+      }
+    });
+
+    /**
+     * example2
+     */
+    const of1 = Rx.Observable
+      .of(1, 2, 3, 4, 5)
+      .merge(Rx.Observable.of(6, 7, 8, 9, 10))
+      .subscribe(val => {
+        console.log(val);
+      });
+  </script>
+</body>
+</html>

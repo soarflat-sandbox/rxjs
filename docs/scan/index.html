@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>scan</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    const source = Rx.Observable.of(1, 2, 3)
+      // scan(accumulator: function, seed: any): Observable
+      // accumulatorはコールバックの戻り値を蓄積する、seedはaccumulatorの初期値
+      // そのため以下のscan処理は
+      // 0 + 1
+      // 1 + 2
+      // 3 + 3
+      // 処理が実行されている。そのため、出力は6
+      .scan((accumulator, currentValue) => accumulator + currentValue, 0);
+    const subscribe = source.subscribe(val => console.log(val));
+  </script>
+</body>
+</html>

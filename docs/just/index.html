@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>just</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.all.min.js"></script>
+  <script>
+    const source = Rx.Observable.just(22);
+    const subscribe = source.subscribe(val => console.log(val));
+  </script>
+</body>
+</html>

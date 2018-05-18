@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>just</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <button id="button">ボタン</button>
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+  <script>
+    const stooge = { name: 'moe' };
+    // 引数と同じ値を返す関数の作成
+    // _.constant(stooge)()を実行すれば
+    // {name: 'moe'}を返す
+    console.log(_.constant(stooge)());
+
+    function getIntervalTimer(start) {
+      return Rx.Observable
+        .interval(4000)
+        .map(_.constant(1))
+        .startWith(0)
+        .scan((acc, v) => {
+          return (acc + v + total - stopper) % total
+        }, start)
+    }
+
+    const elButton = document.getElementById('button');
+    const source2 = Rx.Observable.fromEvent(elButton, 'click')
+      .map((e) => 2)
+      .startWith(0);
+    const subscribe2 = source2.subscribe(val => console.log(val));
+
+    const source3 = Rx.Observable
+      .interval(1000)
+      .map(_.constant(1))
+      .startWith(0)
+      .scan((acc, v) => {
+        console.log('acc', acc);
+        console.log('v', v);
+        return acc + v;
+      }, 0);
+    const subscribe3 = source3.subscribe(val => console.log(val));
+  </script>
+</body>
+</html>

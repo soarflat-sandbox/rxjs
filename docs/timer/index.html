@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>timer</title>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    // timer(initialDelay: number | Date, period: number, scheduler: Scheduler): Observable
+    // 指定した時間の後に数値をemitする、数値は指定された時間順
+
+    const source = Rx.Observable.timer(1000);
+    //output: 0
+    const subscribe = source.subscribe(val => console.log(val));
+
+    // timerは2番目の引数で後続の値をどのくらいの頻度で出すか指定できる
+    // この場合、1秒後に最初の値を出力し、その後2秒ごとに値を出力する
+    const source2 = Rx.Observable.timer(1000, 2000);
+    //output: 0,1,2,3,4,5......
+    const subscribe2 = source2.subscribe(val => console.log(val));
+  </script>
+</body>
+</html>

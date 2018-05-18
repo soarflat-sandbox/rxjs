@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>switchMap</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    const source = Rx.Observable.timer(0, 5000)
+      // 5000に1回switchMap()が実行される
+      // switchMap()の中身はRx.Observable.interval(500)のため
+      // 0.5秒に一回数値を返す
+      // 0
+      // 1
+      // 2
+      // 3
+      // 4
+      // 5
+      // 6
+      // 7
+      // 8
+      //
+      // 5秒たったら再びストリームが流れる
+      // switchMap()は中断され再び最初から始まるため
+      // 0からカウントが開始する
+      .switchMap(() =>  Rx.Observable.interval(500));
+    const subscribe = source.subscribe(val => console.log(val));
+  </script>
+</body>
+</html>
