@@ -56,8 +56,6 @@
     const document$ = Rx.Observable.fromEvent(document, 'click')
       .map(event => `Event time ${event.timeStamp}`)
       .subscribe(val => console.log(val));
-
-
   </script>
 </body>
 </html>

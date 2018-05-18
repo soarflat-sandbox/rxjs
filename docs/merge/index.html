@@ -19,11 +19,11 @@
     const button3 = document.getElementById('button3');
     const source = Rx.Observable
       .merge(
-        Rx.Observable.fromEvent(button, 'click'),
-        Rx.Observable.fromEvent(button3, 'click')
+        Rx.Observable.fromEvent(button, 'click').do(() => console.log('click Button')),
+        Rx.Observable.fromEvent(button3, 'click').do(() => console.log('click Button3'))
       )
       .merge(Rx.Observable.fromEvent(button3, 'click'))
-      .merge(Rx.Observable.fromEvent(button2, 'click').map(() => null))
+      .merge(Rx.Observable.fromEvent(button2, 'click').mapTo(null))
       .map(e => (e && e.screenX) ? e.screenX * 2 : null);
 
     source.subscribe((e) => {
