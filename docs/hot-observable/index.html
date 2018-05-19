@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Cold Observable</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    /**
+     * Hot Observableとは
+     * 自分から値を発行する能動的なObservable、ようはSubscribeしなくても処理が実行される
+     * 後続のObserverの存在に関係なしにメッセージを発行する
+     * 自分より上流のCold Observableを起動し、値の発行を要求する機能を持つ
+     * 下流のObserverを全て束ね、まとめて同じ値を発行する（ストリームを枝分かれさせる）
+     */
+    const source = Rx.Observable.interval(1000);
+
+    // Hot Observableに変換
+    const hot = source.publish();
+
+    // この時点で値はまだpushされない
+    const subscription = hot.subscribe(x => console.log(`Observer 1: onNext: ${x}`));
+
+    console.log(`Current Time after 1st subscription: ${Date.now()}`);
+
+    setTimeout(() => {
+      // connect()を実行し、sourceに接続する
+      // これで、sourceから受け取った値がhotのobserverたちにプッシュされるようになる
+      hot.connect();
+
+      console.log(`Current Time after connect: ${Date.now()}`);
+
+      setTimeout(() => {
+        console.log('Current Time after 2nd subscription: ' + Date.now());
+        // subscription2にもsubscriptionと同じ値が流れる
+        // この時点でsubscriptionがsubscribeしている値は2のため
+        // subscription2も2を取得してconsoleに出力する
+        const subscription2 = hot.subscribe(x => console.log(`Observer 2: onNext: ${x}`));
+      }, 3000);
+    }, 3000);
+  </script>
+</body>
+</html>

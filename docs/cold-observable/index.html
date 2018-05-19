@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Cold Observable</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    /**
+     * Cold Observableとは
+     * 自発的に何もしない受動的なObservable
+     * Observerが登録（Subscribe）されるまで動作しない
+     * ストリームの前後をただつなぐだけで、ストリームを枝分かれさせる機能は無い
+     * 以下は個々のObserverがそれぞれのObservableを受け取っている
+     */
+    const source = Rx.Observable.interval(1000);
+    const subscription1 = source.subscribe(x => console.log(`Observer 1: onNext: ${x}`));
+    let subscription2 = null;
+
+    setTimeout(() => {
+      subscription2 = source.subscribe(x => console.log(`Observer 2: onNext: ${x}`));
+    }, 2000);
+
+    setTimeout(() => {
+      subscription1.unsubscribe();
+      subscription2.unsubscribe();
+    }, 5000);
+  </script>
+</body>
+</html>

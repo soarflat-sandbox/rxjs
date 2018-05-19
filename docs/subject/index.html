@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Cold Observable</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    const subject = new Rx.Subject();
+    const observer = {
+      next: x => console.log('Observer got a next value: ' + x),
+      error: err => console.error('Observer got an error: ' + err),
+      complete: () => console.log('Observer got a complete notification'),
+    };
+    // SubjectはObservableなので、Observerをsubscribeで渡す
+    const subscription = subject.subscribe(observer);
+
+    // SubjectはObserverなので値をpushできる
+    subject.next(1);
+    subject.next(2);
+    subject.complete();
+    subscription.unsubscribe();
+  </script>
+</body>
+</html>

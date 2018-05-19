@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Tutorial</title>
+</head>
+<body>
+  <p>open console!!</p>
+  <input type="text" id="input">
+  <button id="stopStream">stopStream</button>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    /**
+     * Creating observables
+     */
+    const myObservable = new Rx.Subject();
+    myObservable.subscribe(val => console.log(val));
+    // 外部から新しいイベントを作る
+    myObservable.next('foo');
+
+    const myObservable2 = Rx.Observable.create(observer => {
+      // 内部から新しいイベントを作る
+      observer.next('foo');
+      setTimeout(() => observer.next('bar'), 1000);
+    });
+    myObservable2.subscribe(val => console.log(val));
+
+    /**
+     * Controlling the flow
+     */
+    const input = Rx.Observable.fromEvent(document.getElementById('input'), 'input');
+
+    input
+      .filter(event => event.target.value.length > 2)
+      .map(event => event.target.value)
+      .subscribe(value => console.log(value));
+
+    input
+      .delay(200)
+      .map(event => event.target.value)
+      .subscribe(value => console.log(value));
+
+    input
+      .throttleTime(200)
+      .map(event => event.target.value)
+      .subscribe(value => console.log(value))
+
+    input
+      .debounceTime(200)
+      .map(event => event.target.value)
+      .subscribe(value => console.log(value));
+
+    // 3回イベントを送信後、ストリームのイベントを止める（送信させない）
+    input
+      .take(3)
+      .map(event => event.target.value)
+      .subscribe(value => console.log(value));
+
+    const stopStream = Rx.Observable.fromEvent(document.getElementById('stopStream'), 'click');
+    input.takeUntil(stopStream)
+      .map(event => event.target.value)
+      .subscribe(value => console.log('takeUntil ', value));
+  </script>
+</body>
+</html>

@@ -15,12 +15,61 @@
 - Subject
 - Schedulers
 
-### Observable（ストリーム）
-タイマー、マウスカーソルやスクロールの位置、HTTP経由で送られてくるデータなど、時間とともに変化する値やそのまとまりのこと。
-<!-- 将来の値やイベントを呼び出し可能なコレクションのアイデアを表します。 -->
+### Observable/Observable-Sequence（ストリーム）
+タイマー、スクロールの位置、イベントやHTTP経由で送られてくるデータなど、時間とともに変化する値やそのまとまりのこと。
+
+またはイベントやデータの流れを表したもの。
+
+以下のメソッドで生成可能。
+
+- Create
+- Defer
+- Empty/Never/Throw
+- From
+- Interval
+- Just
+- Range
+- Repeat
+- Start
+- Timer 
+
+以下は`fromEvent()`でイベントをObservableに変換したもの。
+
+```js
+Rx.Observable
+  .fromEvent(document.getElementById('input'), 'input')
+  // .map（Operator）に渡されるevent（戻り値）がObservable
+  // .mapでObservableを変換する
+  // Operatorの戻り値もObservableのため
+  // map().map()のようにチェインもできる
+  .map(event => event.target.value);
+```
 
 ### Observer
 Observableによって配信された値をlisten（observe）するコールバックのコレクション(配列やオブジェクト)のこと。
+
+以下はObserverの例
+
+```js
+// .subscribe()に渡すとObservableをlistenしてコールバックを実行する
+const observer = Rx.Observer.create(
+  // 新しい値がプッシュされたときに実行されるコールバック
+  num => console.log('onNext: ' + num),
+  // エラーが起きたときに実行されるコールバック
+  error => console.log('onError: ' + error),
+  // 全て値がプッシュされたときに実行されるコールバック
+  () => console.log('onCompleted')
+);
+
+Rx.Observable
+  .from([1, 2, 3, 4])
+  .subscribe(observer);
+// => onNext: 1
+// => onNext: 2
+// => onNext: 3
+// => onNext: 4
+// => onCompleted
+```
 
 ### Subscription
 Observableの実行を表現したもの、主に実行をキャンセルするのに利用する。
@@ -30,6 +79,8 @@ Observableの実行を表現したもの、主に実行をキャンセルする�
 
 ### Subject
 EventEmitterと同等のもの。複数のオブザーバに値またはイベントをマルチキャスト（同時に送る）できるのはSubjectのみ。
+
+SubjectはObservableとObserverの両方を継承しているため、ObservableでありながらObserverでもある。
 
 ### Schedulers
 中央処理されたdispatcherで、並行性を制御し、計算がいつ起こるかを調整できる（`setTimeout`や`requestAnimationFrame`など）。
