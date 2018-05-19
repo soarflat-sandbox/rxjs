@@ -46,21 +46,39 @@ Rx.Observable
 ```
 
 ### Observer
-Observableによって配信された値をlisten（observe）するコールバックのコレクション(配列やオブジェクト)のこと。
+Observableによって配信された通知と値をlisten（observe）し、通知に応じた処理を実行するコールバックが集まったオブジェクトのこと。
 
-以下はObserverの例
+Observableの通知は`next`、`error`、`complete`の3種類がある。そのため、基本的なObservableは以下のようなものになる。
 
 ```js
-// .subscribe()に渡すとObservableをlistenしてコールバックを実行する
-const observer = Rx.Observer.create(
-  // 新しい値がプッシュされたときに実行されるコールバック
-  num => console.log('onNext: ' + num),
-  // エラーが起きたときに実行されるコールバック
-  error => console.log('onError: ' + error),
-  // 全て値がプッシュされたときに実行されるコールバック
-  () => console.log('onCompleted')
-);
+const observer = {
+  // next通知に対するコールバック
+  next: x => console.log('Observer got a next value: ' + x),
+  // error通知に対するコールバック
+  error: err => console.error('Observer got an error: ' + err),
+  // complete通知に対するコールバック
+  complete: () => console.log('Observer got a complete notification'),
+};
+```
 
+Observerを利用するためには、Observableが提供する`subscribe()`メソッドに渡す必要がある。
+
+`subscribe()`はObservableから配信された通知や値に応じた処理を登録するメソッドである。
+
+これに`observer`を渡すことによって、コールバックが実行される。
+
+```js
+const observer = {
+  // 新しい値がプッシュされたときに実行されるコールバック
+  next: num => console.log('onNext: ' + num),
+  // エラーが起きたときに実行されるコールバック
+  error: error => console.log('onError: ' + error),
+  // 全て値がプッシュされたときに実行されるコールバック
+  complete: () => console.log('onCompleted')
+};
+
+// subscribe()でObservableをSubscribeする
+// 引数のobserverにObservableからの通知と値が配信され、コールバックが実行される
 Rx.Observable
   .from([1, 2, 3, 4])
   .subscribe(observer);
@@ -69,6 +87,41 @@ Rx.Observable
 // => onNext: 3
 // => onNext: 4
 // => onCompleted
+```
+
+Observerはただのオブジェクトのため、以下のように`subscribe()`に記述することも可能。
+
+```js
+Rx.Observable
+  .from([1, 2, 3, 4])
+  .subscribe({
+    // 新しい値がプッシュされたときに実行されるコールバック
+    next: num => console.log('onNext: ' + num),
+    // エラーが起きたときに実行されるコールバック
+    error: error => console.log('onError: ' + error),
+    // 全て値がプッシュされたときに実行されるコールバック
+    complete: () => console.log('onCompleted')
+   });
+  // => onNext: 1
+  // => onNext: 2
+  // => onNext: 3
+  // => onNext: 4
+  // => onCompleted
+```
+
+オブジェクトではなく、コールバックだけ渡すこともできる。
+
+```js
+Rx.Observable
+  .from([1, 2, 3, 4])
+  .subscribe(
+    // 新しい値がプッシュされたときに実行されるコールバック
+    num => console.log('onNext: ' + num),
+    // エラーが起きたときに実行されるコールバック
+    error => console.log('onError: ' + error),
+    // 全て値がプッシュされたときに実行されるコールバック
+    () => console.log('onCompleted')
+   );
 ```
 
 ### Subscription

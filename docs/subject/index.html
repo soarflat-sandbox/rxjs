@@ -14,14 +14,42 @@
       error: err => console.error('Observer got an error: ' + err),
       complete: () => console.log('Observer got a complete notification'),
     };
-    // SubjectはObservableなので、Observerをsubscribeで渡す
+    // SubjectはObservableなので、Observerをsubscribeする
     const subscription = subject.subscribe(observer);
 
-    // SubjectはObserverなので値をpushできる
+    // SubjectはObserverでもあるため、値をpushできる
     subject.next(1);
     subject.next(2);
     subject.complete();
     subscription.unsubscribe();
+
+    /**
+     * 2つのObserverをSubscribeしている例
+     */
+    const subject2 = new Rx.Subject();
+    subject2.subscribe({
+      next: v => console.log('observerA: ' + v)
+    });
+    subject2.subscribe({
+      next: v => console.log('observerB: ' + v)
+    });
+    subject.next(1);
+    subject.next(2);
+
+    /**
+     * SubjectはObservableなのでobserverをSubscribeできる
+     * また、SubjectはObserverなので
+     * 別のObservableのSubscribeに渡すこともできる
+     */
+    const subject3 = new Rx.Subject();
+    subject3.subscribe({
+      next: v => console.log('observerA: ' + v)
+    });
+    subject3.subscribe({
+      next: v => console.log('observerB: ' + v)
+    });
+    const observable = Rx.Observable.from([1, 2, 3]);
+    observable.subscribe(subject3);
   </script>
 </body>
 </html>
