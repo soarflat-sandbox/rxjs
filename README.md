@@ -181,7 +181,7 @@ subscription.unsubscribe();
 
 Observable によって配信された通知と値を listen（observe）し、通知に応じた処理を実行するコールバックが集まったオブジェクトのこと。
 
-Observable の通知は`next`、`error`、`complete`の 3 種類がある。そのため、基本的な Observable は以下のようなものになる。
+Observable の通知は`next`、`error`、`complete`の 3 種類がある。そのため、基本的な Observer オブジェクトは以下のようになる。
 
 ```js
 const observer = {
@@ -251,21 +251,58 @@ Rx.Observable.from([1, 2, 3, 4]).subscribe(
 );
 ```
 
-### Subscription
+## Subscription
 
-Observable の実行を表現したもの、主に実行をキャンセルするのに利用する。
+実行中の Observable Execution を表したもの。Execution を取り消すことができる API を備えている。
 
-### Operators
+```js
+const observable = Rx.Observable.interval(1000);
+const subscription = observable.subscribe(x => console.log(x));
 
-`map`、`filter`、`concat`、`flatMap`などの操作でコレクションを処理する関数型プログラミングスタイルを可能にする純粋関数。
+// 実行中のObservable executionを取り消す
+subscription.unsubscribe();
+```
 
-### Subject
+１つの Subscription の `unsubscribe()`で、複数の Subscription を取り消せる。
+
+以下のように、ある Subscription を別の Subscription に`add`することで、これを実現できる。
+
+```js
+const observable1 = Rx.Observable.interval(400);
+const observable2 = Rx.Observable.interval(300);
+const subscription = observable1.subscribe(x => console.log('first: ' + x));
+const childSubscription = observable2.subscribe(x =>
+  console.log('second: ' + x)
+);
+
+subscription.add(childSubscription);
+
+setTimeout(() => {
+  // subscriptionとchildSubscriptionのObservable executionを取り消す
+  subscription.unsubscribe();
+}, 1000);
+
+// console.logの出力は以下の通り
+// second: 0
+// first: 0
+// second: 1
+// first: 1
+// second: 2
+```
+
+`add`した Subscription を取り消すには`remove(otherSubscription)`メソッドを利用する。
+
+## Subject
 
 EventEmitter と同等のもの。複数のオブザーバに値またはイベントをマルチキャスト（同時に送る）できるのは Subject のみ。
 
 Subject は Observable と Observer の両方を継承しているため、Observable でありながら Observer でもある。
 
-### Schedulers
+## Operators
+
+`map`、`filter`、`concat`、`flatMap`などの操作でコレクションを処理する関数型プログラミングスタイルを可能にする純粋関数。
+
+## Schedulers
 
 中央処理された dispatcher で、並行性を制御し、計算がいつ起こるかを調整できる（`setTimeout`や`requestAnimationFrame`など）。
 
