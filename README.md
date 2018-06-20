@@ -83,7 +83,7 @@ Rx.Observable.fromEvent(input, 'input')
   .map(event => event.target.value);
 ```
 
-### Observable の重要な概念、仕組みを理解する
+### Observable の概念、仕組みを理解する
 
 - Creating Observables
 - Subscribing to Observables
@@ -94,7 +94,7 @@ Rx.Observable.fromEvent(input, 'input')
 
 `Rx.Observable.create` は `Observable` コンストラクタのエイリアスであり、`subscribe` 関数を引数としてとる。
 
-以下は Observable を作成し、Observer に 1 秒ごとに文字列 'hi'を出力する。
+以下は Observable を作成し、Observer に 1 秒ごとに文字列`'hi'`を配信する。
 
 ```js
 const observable = Rx.Observable.create(function subscribe(observer) {
@@ -120,19 +120,64 @@ const observable = Rx.Observable.create(function subscribe(observer) {
 observable.subscribe(x => console.log(x));
 ```
 
+subscribe をすることで、Observable execution が開始され、その execution の Observer（`subscribe`関数に渡された`observer`）に値またはイベントを渡す。
+
 #### Executing Observables
 
-`Observable.create(function subscribe(observer) {...})`内のコードは Observable execution（subscribe する Observer ごとにのみ発生する遅延計算）である（遅延計算とは、すぐには評価されず、結果が必要なときに評価される計算のこと）。
+`Observable.create(function subscribe(observer){...})`内のコードは Observable execution（subscribe する Observer ごとにのみ発生する遅延計算）である。
 
-Observable execution は、時間の経過とともに、同期的または非同期的に複数の値を生成する。
+遅延計算とは、すぐには評価されず、結果が必要なときに評価される計算（処理）のこと。
 
-また、Observable Execution が提供できる値のタイプは以下の３つ。
+Observable execution は、時間の経過とともに、同期的または非同期的に複数の値を生成し、Observer に通知とそれに応じた値を配信する。
 
-- "Next" notification: 数値、文字列、オブジェクトなどの値を送信する。
-- "Error" notification: JavaScript エラーまたは例外を送信する。
-- "Complete" notification: 通知はするが、値は送信しない。
+Observable execution が送信する通知のタイプは以下の３つ。
 
-### Observer
+- "Next" notification: 数値、文字列、オブジェクトなどの値を配信する。
+- "Error" notification: JavaScript エラーまたは例外を配信する。
+- "Complete" notification: 通知はするが、値は配信しない。
+
+#### Disposing Observable Executions
+
+`observable.subscribe` が呼び出されると、Observer は新しく作成された Observable execution にアタッチされ、Subscription であるオブジェクトも返す。
+
+```js
+const subscription = observable.subscribe(x => console.log(x));
+```
+
+Subscription は実行中の Execution を表し、その Execution を取り消すことができる最小限の API を備えている。Subscription のタイプは[こちら](http://reactivex.io/rxjs/manual/overview.html#subscription)を参照。
+
+以下のように`subscription.unsubscribe()`を利用すると、実行中の Execution を取り消せる。
+
+```js
+const observable = Rx.Observable.from([10, 20, 30]);
+// subscribeすることで、進行中のExecutionを表すSubscriptionが返される。
+const subscription = observable.subscribe(x => console.log(x));
+
+// 実行をキャンセルする
+subscription.unsubscribe();
+```
+
+`create()`を使用して Observable を作成するときに、その実行のリソースを処分する方法を定義する必要がある。
+
+関数`subscribe()`内から独自で定義した`unsubscribe`関数を返すことで、リソースを処分する。
+
+```js
+const observable = Rx.Observable.create(function subscribe(observer) {
+  const intervalID = setInterval(() => {
+    observer.next('hi');
+  }, 1000);
+
+  // intervalをクリアする手段を提供する
+  return function unsubscribe() {
+    clearInterval(intervalID);
+  };
+});
+
+const subscription = observable.subscribe(x => console.log(x));
+subscription.unsubscribe();
+```
+
+## Observer
 
 Observable によって配信された通知と値を listen（observe）し、通知に応じた処理を実行するコールバックが集まったオブジェクトのこと。
 
