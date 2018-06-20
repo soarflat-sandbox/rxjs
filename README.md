@@ -393,68 +393,6 @@ Rx.Observable.fromEvent(button, 'click')
 
 他の値を生成する演算子は、`pluck`、`pairwise`、`sample`などが存在する。
 
-## Observable
-
-Observables は複数の値の lazy Push コレクションです。彼らは次の表に欠けている箇所を埋める。
-
-subscribed 時に直ちに（同期的に）値 1,2,3 をプッシュし、subscribed 呼び出しから 1 秒後に値 4 をプッシュする Observable を次に示します。
-
-```js
-const observable = Rx.Observable.create(observer => {
-  observer.next(1);
-  observer.next(2);
-  observer.next(3);
-  setTimeout(() => {
-    observer.next(4);
-    observer.complete();
-  }, 1000);
-});
-```
-
-Observable を呼び出して、値を取得するためにはそれを subscribe する必要がある。
-
-```js
-const observable = Rx.Observable.create(observer => {
-  observer.next(1);
-  observer.next(2);
-  observer.next(3);
-  setTimeout(() => {
-    observer.next(4);
-    observer.complete();
-  }, 1000);
-});
-console.log('just before subscribe');
-observable.subscribe({
-  next: x => console.log('got value ' + x),
-  error: err => console.error('something wrong occurred: ' + err),
-  complete: () => console.log('done'),
-});
-console.log('just after subscribe');
-
-// 以下がconsoleに出力される
-// just before subscribe
-// got value 1
-// got value 2
-// got value 3
-// just after subscribe
-// got value 4
-// done
-```
-
-### Pull versus Push
-
-プルとプッシュは、データプロデューサがデータコンシューマとどのように通信できるかを記述する 2 つの異なるプロトコルです。
-
-プルとは何ですか？プルシステムでは、コンシューマはデータプロデューサからデータを受信するタイミングを決定します。プロデューサ自体は、データがコンシューマにいつ配信されるかを認識していません。
-
-すべての JavaScript 関数はプルシステムです。この関数はデータのプロデューサであり、関数を呼び出すコードは呼び出しから単一の戻り値を「引き出す」ことによってそれを消費しています。
-
-ES2015 では、プルシステムの別のタイプであるジェネレータ関数とイテレータ（関数\*）が導入されました。 iterator.next（）を呼び出すコードはコンシューマであり、イテレータ（プロデューサ）から複数の値を引き出す。
-
-<!-- 通常、コードの他の部分があなたの状態を台無しにすることがある、不純な関数を作成します。 -->
-
-<!-- ストリームはobserveされるsubject、つまりObservableでもある。（??????） -->
-
 ## RxJS（リアクティブプログラミング）の思想、考え方
 
 関数型プログラミング。
