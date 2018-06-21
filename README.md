@@ -23,22 +23,9 @@
 - 時間とともに変化する値（データ）やイベントの流れを表したもの。
 - タイマー、スクロールの位置、イベントや HTTP 経由で送られてくるデータなど、時間とともに変化する値やそのまとまりのこと。
 
-以下のメソッドで生成可能。
-
-- Create
-- Defer
-- Empty/Never/Throw
-- From
-- Interval
-- Just
-- Range
-- Repeat
-- Start
-- Timer
-
 ### Observable のサンプル１
 
-以下は subscribe 時に同期的に値 `1`、`2`、`3` をプッシュし、subscribe 呼び出しから 1 秒後（非同期）に値 `4` をプッシュする Observable を生成して subscribe したもの。
+以下は subscribe 時に同期的に値 `1`、`2`、`3` をプッシュし、その 1 秒後（非同期）に値 `4` をプッシュする Observable を`create()`で生成し、 subscribe したもの。
 
 ```js
 const observable = Rx.Observable.create(observer => {
@@ -51,7 +38,7 @@ const observable = Rx.Observable.create(observer => {
   }, 1000);
 });
 
-// ↑のObservableを呼び出して、値を確認するためには以下のようにsubscribeする
+// observableからobserverに値を配信して、出力を確認するためにsubscribeする
 console.log('just before subscribe');
 observable.subscribe({
   next: x => console.log('got value ' + x),
@@ -72,15 +59,14 @@ console.log('just after subscribe');
 
 ### Observable のサンプル２
 
-以下は`fromEvent()`でイベントを Observable に変換したもの。
+以下は`fromEvent()`でイベントを Observable に変換し、subscribe したもの。
 
 ```js
 const input = document.getElementById('input');
-Rx.Observable.fromEvent(input, 'input')
-  // .map（Operator）に渡されるevent（戻り値）がObservable
-  // .mapでObservableを変換する
-  // Operatorの戻り値もObservableのため、`map().map()`のようにチェインもできる
-  .map(event => event.target.value);
+const observable = Rx.Observable.fromEvent(input, 'input');
+
+// inputに入力した値が出力される
+observable.subscribe(event => console.log(event.target.value));
 ```
 
 ### Observable の概念、仕組みを理解する
@@ -120,13 +106,13 @@ const observable = Rx.Observable.create(function subscribe(observer) {
 observable.subscribe(x => console.log(x));
 ```
 
-subscribe をすることで、Observable execution が開始され、その execution の Observer（`subscribe`関数に渡された`observer`）に値またはイベントを渡す。
+subscribe をすることで、Observable execution（subscribe する Observer ごとにのみ発生する遅延計算）が開始され、その execution の Observer（`subscribe`関数に渡された`observer`）に値またはイベントを渡す。
+
+※遅延計算とは、すぐには評価されず、結果が必要なときに評価される計算（処理）のこと。
 
 #### Executing Observables
 
-`Observable.create(function subscribe(observer){...})`内のコードは Observable execution（subscribe する Observer ごとにのみ発生する遅延計算）である。
-
-遅延計算とは、すぐには評価されず、結果が必要なときに評価される計算（処理）のこと。
+`Observable.create(function subscribe(observer){...})`内のコードは Observable execution である。
 
 Observable execution は、時間の経過とともに、同期的または非同期的に複数の値を生成し、Observer に通知とそれに応じた値を配信する。
 
@@ -144,7 +130,7 @@ Observable execution が送信する通知のタイプは以下の３つ。
 const subscription = observable.subscribe(x => console.log(x));
 ```
 
-Subscription は実行中の Execution を表し、その Execution を取り消すことができる最小限の API を備えている。Subscription のタイプは[こちら](http://reactivex.io/rxjs/manual/overview.html#subscription)を参照。
+Subscription は実行中の Execution を表し、その Execution を取り消すことができる最小限の API を提供する。Subscription のタイプは[こちら](http://reactivex.io/rxjs/manual/overview.html#subscription)を参照。
 
 以下のように`subscription.unsubscribe()`を利用すると、実行中の Execution を取り消せる。
 
@@ -253,7 +239,7 @@ Rx.Observable.from([1, 2, 3, 4]).subscribe(
 
 ## Subscription
 
-実行中の Observable Execution を表したもの。Execution を取り消すことができる API を備えている。
+実行中の Observable Execution を表したもの。Execution を取り消すことができる API を提供する。
 
 ```js
 const observable = Rx.Observable.interval(1000);
@@ -294,9 +280,112 @@ setTimeout(() => {
 
 ## Subject
 
-EventEmitter と同等のもの。複数のオブザーバに値またはイベントをマルチキャスト（同時に送る）できるのは Subject のみ。
+Observable でありながら Observer でもある特別な Observable。複数の Observer に値またはイベントをマルチキャスト（同時に送る）できる。
 
-Subject は Observable と Observer の両方を継承しているため、Observable でありながら Observer でもある。
+以下は、Subject に２つの Observer をアタッチし、いくつかの値を Subject（Observer） に配信する。
+
+```js
+const subject = new Rx.Subject();
+
+subject.subscribe({
+  next: v => console.log('observerA: ' + v),
+});
+subject.subscribe({
+  next: v => console.log('observerB: ' + v),
+});
+
+subject.next(1);
+subject.next(2);
+
+// console.logの出力は以下の通り
+// observerA: 1
+// observerB: 1
+// observerA: 2
+// observerB: 2
+```
+
+Subject は Observer であるため、以下のように、Observable の`subscribe`への引数として Subject を指定することもできる。
+
+```js
+const subject = new Rx.Subject();
+
+subject.subscribe({
+  next: v => console.log('observerA: ' + v),
+});
+subject.subscribe({
+  next: v => console.log('observerB: ' + v),
+});
+
+const observable = Rx.Observable.from([1, 2, 3]);
+// subscribe()の引数としてSubjectを指定できる
+observable.subscribe(subject);
+
+// console.logの出力は以下の通り
+// observerA: 1
+// observerB: 1
+// observerA: 2
+// observerB: 2
+// observerA: 3
+// observerB: 3
+```
+
+上記のように Subject を利用すれば、単一の Observable から 複数の Observer に対して、値またはイベントを配信できる（マルチキャストできる）。
+
+### Multicasted Observables
+
+Multicasted Observables は、subscriber を持つ可能性のあるサブジェクトを介して通知を渡す。
+
+フードの下では、これは`multicast`オペレータがどのように動作するかです。
+
+Observer は基礎となる Subject を subscribe し、Subject は source Observable に subscribe する。
+
+```js
+const source = Rx.Observable.from([1, 2, 3]);
+const subject = new Rx.Subject();
+const multicasted = source.multicast(subject);
+
+// Under the hood, `subject.subscribe({...})`を実行してるだけ
+multicasted.subscribe({
+  next: v => console.log('observerA: ' + v),
+});
+multicasted.subscribe({
+  next: v => console.log('observerB: ' + v),
+});
+
+// Under the hood, `source.subscribe(subject)`を実行してるだけ
+multicasted.connect();
+```
+
+`multicast`は何の変哲もなさそうな Observable を返すが、その Observable は subscribe する場合 Subject として振る舞う。
+
+`multicast`は `ConnectableObservable` を返す。`ConnectableObservable`は`connect()`メソッドを持った Observable である。
+
+`connect()`メソッドは、共有の Observable execution がいつ開始されるかを正確に判断するために重要である。
+
+`connect()`は `source.subscribe(subject)`を実行するため、Subscription を返す。Subscription は、共有の Observable execution を取り消すために unsubscribe できる。
+
+### Reference counting
+
+`connect()`を手動で呼び出して Subscription を処理することは面倒。通常、最初の Observer が到着したときに自動的に接続し、最後の Observer が unsubscribe すると自動的に共有された Observable execution をキャンセルする。
+
+1.  最初の Observer は、マルチキャストされた Observable
+1.  マルチキャストされた Observable が接続されている
+1.  次の値 0 が最初の Observer に渡される
+1.  Second Observer は、マルチキャストされた Observable に subscribe する
+1.  次の値 1 は、第 1 Observer
+1.  次の値 1 は、第 2 Observer
+1.  最初の Observer は、マルチキャストされた Observable からの登録解除
+1.  次の値 2 は、第 2 Observer
+1.  第 2 Observer は、マルチキャストされた Observable からの登録解除
+1.  マルチキャストされた Observable への接続は登録解除されている
+
+明示的に `connect()`を呼び出すことでそれを実現するために、次のコードを記述します：
+
+```js
+const source = Rx.Observable.interval(500);
+const subject = new Rx.Subject();
+const multicasted = source.multicast(subject);
+```
 
 ## Operators
 
