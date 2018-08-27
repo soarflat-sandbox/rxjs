@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>forkJoin Example 2</title>
+</head>
+
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    const myPromise = val =>
+      new Promise(resolve => {
+        const ms = Math.floor(Math.random() * (2000 - 500) + 500);
+        setTimeout(() => resolve(`Promise Resolved: ${val}, ms: ${ms}`), ms)
+      });
+
+    Rx.Observable.of([1, 2, 3, 4, 5])
+      .mergeMap(q => Rx.Observable.forkJoin(q.map(myPromise)))
+      .subscribe(console.log);
+    // => [
+    //   "Promise Resolved: 1, ms: ○○"
+    //   "Promise Resolved: 2, ms: ○○"
+    //   "Promise Resolved: 3, ms: ○○"
+    //   "Promise Resolved: 4, ms: ○○"
+    //   "Promise Resolved: 5, ms: ○○"
+    // ]
+  </script>
+</body>
+
+</html>

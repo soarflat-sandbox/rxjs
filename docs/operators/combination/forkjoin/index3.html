@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>forkJoin Example 3</title>
+</head>
+
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    // forkJoin は全ての Observable が complete を発火しないと値が流れない。
+    // 今回、一つの Observable が error を発火するため、値は流れず catch の処理が実行される。
+    Rx.Observable
+      .forkJoin(
+        Rx.Observable.of('Hello'),
+        Rx.Observable.of('world').delay(1000),
+        Rx.Observable.throw('This will error')
+      )
+      .catch(error => Rx.Observable.of(error))
+      .subscribe(console.log);
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>forkJoin Example 1</title>
+</head>
+
+<body>
+  <p>open console!!</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.10/Rx.min.js"></script>
+  <script>
+    const myPromise = val =>
+      new Promise(resolve =>
+        setTimeout(() => resolve(`Promise Resolved: ${val}`), 3000)
+      });
+
+    Rx.Observable
+      .forkJoin(
+        // 'hello'を即時にemitするObservable
+        Rx.Observable.of('hello'),
+
+        // 'world'を1秒後にemitするObservable
+        Rx.Observable.of('world').delay(1000),
+
+        // 0を1秒後にemitするObservable
+        Rx.Observable.interval(1000).take(1),
+
+        // 0...1を1秒毎にemitするObservable
+        Rx.Observable.interval(1000).take(4),
+
+        // 3秒後にresolveをするPromise（Observable）
+        myPromise('RESULT')
+      )
+      .subscribe(console.log);
+    // => ["Hello", "World", 0, 3, "Promise Resolved: RESULT"]
+  </script>
+</body>
+
+</html>
